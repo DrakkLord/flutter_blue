@@ -16,7 +16,23 @@ class Guid {
 
   Guid.fromMac(String input) : this._internal(_fromMacString(input));
 
+  Guid.fromIntList(List<int> values) : this._internal(_fromIntList(values));
+
   Guid.empty() : this._internal(new List.filled(16, 0));
+
+  static List<int> _fromIntList(List<int> values) {
+    var bytes = new List<int>.filled(16, 0);
+
+    if (values == null) {
+      throw new ArgumentError("Values were null");
+    }
+    if (values.length != 16) {
+      throw new ArgumentError("Values contains invalid number of elements");
+    }
+
+    bytes.setRange(0, 16, values);
+    return bytes;
+  }
 
   static List<int> _fromMacString(input) {
     var bytes = new List<int>.filled(16, 0);
