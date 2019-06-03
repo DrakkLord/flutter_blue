@@ -604,7 +604,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
   // Service Data
   NSDictionary *serviceData = advertisementData[CBAdvertisementDataServiceDataKey];
   for (CBUUID *uuid in serviceData) {
-    [[ads serviceData] setObject:serviceData[uuid] forKey:uuid.UUIDString];
+    [[ads serviceData] setObject:serviceData[uuid] forKey:uuid.fullUUIDString];
   }
   // Service Uuids
   NSArray *serviceUuids = advertisementData[CBAdvertisementDataServiceUUIDsKey];
