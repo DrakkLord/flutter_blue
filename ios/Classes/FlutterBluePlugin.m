@@ -515,8 +515,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     }
     ProtosReadDescriptorResponse *result = [[ProtosReadDescriptorResponse alloc] init];
     [result setRequest:q];
-    int value = [descriptor.value intValue];
-    [result setValue:[NSData dataWithBytes:&value length:sizeof(value)]];
+    [result setValue:descriptor.value];
     _descriptorReadStreamHandler.sink([self toFlutterData:result]);
   }
   // If descriptor is CCCD, send a SetNotificationResponse in case anything is awaiting
@@ -706,8 +705,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
   [result setUuid:[descriptor.UUID fullUUIDString]];
   [result setCharacteristicUuid:[descriptor.characteristic.UUID fullUUIDString]];
   [result setServiceUuid:[descriptor.characteristic.service.UUID fullUUIDString]];
-  int value = [descriptor.value intValue];
-  [result setValue:[NSData dataWithBytes:&value length:sizeof(value)]];
+  [result setValue:descriptor.value];
   return result;
 }
 
