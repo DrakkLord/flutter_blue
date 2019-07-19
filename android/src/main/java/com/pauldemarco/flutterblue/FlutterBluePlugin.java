@@ -206,19 +206,27 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 }
 
                 // If device was connected to previously but is now disconnected, attempt a reconnect
+                // If reconnect fails cleanup the GATT server instance and carry on creating a new one
                 if(mGattServers.containsKey(deviceId) && !isConnected) {
-                    if(!mGattServers.get(deviceId).connect()){
-                        result.error("reconnect_error", "error when reconnecting to device", null);
-                        return;
+                    if (!mGattServers.get(deviceId).connect()) {
+                        mGattServers.get(deviceId).close();
+                        mGattServers.remove(deviceId);
+                    } else {
+                        result.success(null);
+                        break;
                     }
                 }
 
                 // New request, connect and add gattServer to Map
                 BluetoothGatt gattServer;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    gattServer = device.connectGatt(activity, options.getAndroidAutoConnect(), mGattCallback, BluetoothDevice.TRANSPORT_LE);
+                    gattServer = device.connectGatt(activity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE);
                 } else {
-                    gattServer = device.connectGatt(activity, options.getAndroidAutoConnect(), mGattCallback);
+                    gattServer = device.connectGatt(activity, false, mGattCallback);
+                }
+
+                if (options.getAndroidAutoConnect()) {
+                    gattServer.connect();
                 }
                 mGattServers.put(deviceId, gattServer);
                 result.success(null);
