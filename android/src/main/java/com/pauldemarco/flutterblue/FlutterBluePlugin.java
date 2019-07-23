@@ -237,8 +237,16 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
             {
                 String deviceId = (String)call.arguments;
                 BluetoothGatt gattServer = mGattServers.remove(deviceId);
-                if(gattServer != null) {
-                    gattServer.disconnect();
+                if (gattServer != null) {
+					boolean skipCall = false;
+					final BluetoothAdapter localBluetoothAdapter = mBluetoothAdapter;
+					if (localBluetoothAdapter != null) {
+                        skipCall = !localBluetoothAdapter.isEnabled();
+                    }
+
+					if (!skipCall) {
+						gattServer.disconnect();
+					}
                 }
                 result.success(null);
                 break;
@@ -784,7 +792,14 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
             }
             Protos.ReadDescriptorResponse.Builder p = Protos.ReadDescriptorResponse.newBuilder();
             p.setRequest(q);
-            p.setValue(ByteString.copyFrom(descriptor.getValue()));
+
+            // in case of the remote is disconnected or there is an issue the getValue may return null!
+            byte[] valueData = descriptor.getValue();
+            if (valueData == null) {
+                valueData = new byte[0];
+            }
+
+            p.setValue(ByteString.copyFrom(valueData));
             invokeMethodUIThread("ReadDescriptorResponse", p.build().toByteArray());
         }
 
