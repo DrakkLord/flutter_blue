@@ -119,6 +119,7 @@ message RequestMTURequest {
 message RequestMTUResult {
   string remote_id = 1;
   int32 remoteMTUSize = 2;
+  bool success = 3;
 }
 
 message ReadCharacteristicRequest {

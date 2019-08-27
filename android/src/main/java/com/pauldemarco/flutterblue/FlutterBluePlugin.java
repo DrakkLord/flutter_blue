@@ -281,6 +281,37 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 break;
             }
 
+            case "requestMTU":
+            {
+                byte[] data = call.arguments();
+                Protos.RequestMTURequest options;
+                try {
+                    options = Protos.RequestMTURequest.newBuilder().mergeFrom(data).build();
+                } catch (InvalidProtocolBufferException e) {
+                    result.error("RuntimeException", e.getMessage(), e);
+                    break;
+                }
+                String deviceId = options.getRemoteId();
+                int localMTUSize = options.getLocalMTUSize();
+
+                BluetoothGatt gattServer = mGattServers.get(deviceId);
+                if(gattServer == null) {
+                    result.error("request_mtu_error", "no instance of BluetoothGatt, have you connected first?", null);
+                    return;
+                }
+                if (localMTUSize <= 0) {
+                    result.error("request_mtu_error", "invalid mtu size requested", null);
+                    return;
+                }
+
+                if(gattServer.requestMtu(localMTUSize)) {
+                    result.success(null);
+                } else {
+                    result.error("request_mtu_error", "requestMtu call failed", null);
+                }
+                break;
+            }
+
             case "services":
             {
                 String deviceId = (String)call.arguments;
@@ -838,6 +869,13 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             log(LogLevel.DEBUG, "[onMtuChanged] mtu: " + mtu + " status: " + status);
+
+            Protos.RequestMTUResult.Builder p = Protos.RequestMTUResult.newBuilder();
+            p.setRemoteId(gatt.getDevice().getAddress());
+            p.setRemoteMTUSize(mtu);
+            p.setSuccess(status == BluetoothGatt.GATT_SUCCESS);
+
+            invokeMethodUIThread("RequestMTUResult", p.build().toByteArray());
         }
     };
 

@@ -75,8 +75,8 @@ class BluetoothDevice {
     return response;
   }
 
-  /// Request mtu size, on iOS this doesnt actually request anything because iOS handles it automatically,
-  /// however it will still return the negotiated MTU size
+  /// Request mtu size, on iOS this doesn't actually request anything because iOS handles it automatically,
+  /// however it will return the negotiated MTU size
   Future<int> requestMTUSize(int newMTUSize) async {
     var request = protos.RequestMTURequest.create()
       ..remoteId = id.toString()
