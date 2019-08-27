@@ -463,6 +463,36 @@ typedef GPB_ENUM(ProtosDiscoverServicesResult_FieldNumber) {
 
 @end
 
+#pragma mark - ProtosRequestMTURequest
+
+typedef GPB_ENUM(ProtosRequestMTURequest_FieldNumber) {
+  ProtosRequestMTURequest_FieldNumber_RemoteId = 1,
+  ProtosRequestMTURequest_FieldNumber_LocalMtusize = 2,
+};
+
+@interface ProtosRequestMTURequest : GPBMessage
+
+@property(nonatomic, readwrite, copy, null_resettable) NSString *remoteId;
+
+@property(nonatomic, readwrite) int32_t localMtusize;
+
+@end
+
+#pragma mark - ProtosRequestMTUResult
+
+typedef GPB_ENUM(ProtosRequestMTUResult_FieldNumber) {
+  ProtosRequestMTUResult_FieldNumber_RemoteId = 1,
+  ProtosRequestMTUResult_FieldNumber_RemoteMtusize = 2,
+};
+
+@interface ProtosRequestMTUResult : GPBMessage
+
+@property(nonatomic, readwrite, copy, null_resettable) NSString *remoteId;
+
+@property(nonatomic, readwrite) int32_t remoteMtusize;
+
+@end
+
 #pragma mark - ProtosReadCharacteristicRequest
 
 typedef GPB_ENUM(ProtosReadCharacteristicRequest_FieldNumber) {

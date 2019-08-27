@@ -111,6 +111,16 @@ message DiscoverServicesResult {
   repeated BluetoothService services = 2;
 }
 
+message RequestMTURequest {
+  string remote_id = 1;
+  int32 localMTUSize = 2;
+}
+
+message RequestMTUResult {
+  string remote_id = 1;
+  int32 remoteMTUSize = 2;
+}
+
 message ReadCharacteristicRequest {
   string remote_id = 1;
   string characteristic_uuid = 2;

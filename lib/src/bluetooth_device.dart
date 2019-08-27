@@ -75,6 +75,27 @@ class BluetoothDevice {
     return response;
   }
 
+  /// Request mtu size, on iOS this doesnt actually request anything because iOS handles it automatically,
+  /// however it will still return the negotiated MTU size
+  Future<int> requestMTUSize(int newMTUSize) async {
+    var request = protos.RequestMTURequest.create()
+      ..remoteId = id.toString()
+      ..localMTUSize = newMTUSize;
+
+    var response = FlutterBlue.instance._methodStream
+        .where((m) => m.method == "RequestMTUResult")
+        .map((m) => m.arguments)
+        .map((buffer) => new protos.RequestMTUResult.fromBuffer(buffer))
+        .where((p) => p.remoteId == id.toString())
+        .map((p) => p.remoteMTUSize)
+        .first;
+
+    await FlutterBlue.instance._channel
+        .invokeMethod('requestMTU', request.writeToBuffer());
+
+    return response;
+  }
+
   /// Returns a list of Bluetooth GATT services offered by the remote device
   /// This function requires that discoverServices has been completed for this device
   Stream<List<BluetoothService>> get services async* {

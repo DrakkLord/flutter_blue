@@ -1,8 +1,9 @@
 ///
 //  Generated code. Do not modify.
 //  source: flutterblue.proto
-///
-// ignore_for_file: camel_case_types,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name
+//
+// @dart = 2.3
+// ignore_for_file: camel_case_types,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type
 
 import 'dart:core' as $core show bool, Deprecated, double, int, List, Map, override, pragma, String;
 
@@ -508,6 +509,70 @@ class DiscoverServicesResult extends $pb.GeneratedMessage {
   void clearRemoteId() => clearField(1);
 
   $core.List<BluetoothService> get services => $_getList(1);
+}
+
+class RequestMTURequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('RequestMTURequest')
+    ..aOS(1, 'remoteId')
+    ..a<$core.int>(2, 'localMTUSize', $pb.PbFieldType.O3)
+    ..hasRequiredFields = false
+  ;
+
+  RequestMTURequest._() : super();
+  factory RequestMTURequest() => create();
+  factory RequestMTURequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RequestMTURequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  RequestMTURequest clone() => RequestMTURequest()..mergeFromMessage(this);
+  RequestMTURequest copyWith(void Function(RequestMTURequest) updates) => super.copyWith((message) => updates(message as RequestMTURequest));
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RequestMTURequest create() => RequestMTURequest._();
+  RequestMTURequest createEmptyInstance() => create();
+  static $pb.PbList<RequestMTURequest> createRepeated() => $pb.PbList<RequestMTURequest>();
+  static RequestMTURequest getDefault() => _defaultInstance ??= create()..freeze();
+  static RequestMTURequest _defaultInstance;
+
+  $core.String get remoteId => $_getS(0, '');
+  set remoteId($core.String v) { $_setString(0, v); }
+  $core.bool hasRemoteId() => $_has(0);
+  void clearRemoteId() => clearField(1);
+
+  $core.int get localMTUSize => $_get(1, 0);
+  set localMTUSize($core.int v) { $_setSignedInt32(1, v); }
+  $core.bool hasLocalMTUSize() => $_has(1);
+  void clearLocalMTUSize() => clearField(2);
+}
+
+class RequestMTUResult extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('RequestMTUResult')
+    ..aOS(1, 'remoteId')
+    ..a<$core.int>(2, 'remoteMTUSize', $pb.PbFieldType.O3)
+    ..hasRequiredFields = false
+  ;
+
+  RequestMTUResult._() : super();
+  factory RequestMTUResult() => create();
+  factory RequestMTUResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory RequestMTUResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  RequestMTUResult clone() => RequestMTUResult()..mergeFromMessage(this);
+  RequestMTUResult copyWith(void Function(RequestMTUResult) updates) => super.copyWith((message) => updates(message as RequestMTUResult));
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static RequestMTUResult create() => RequestMTUResult._();
+  RequestMTUResult createEmptyInstance() => create();
+  static $pb.PbList<RequestMTUResult> createRepeated() => $pb.PbList<RequestMTUResult>();
+  static RequestMTUResult getDefault() => _defaultInstance ??= create()..freeze();
+  static RequestMTUResult _defaultInstance;
+
+  $core.String get remoteId => $_getS(0, '');
+  set remoteId($core.String v) { $_setString(0, v); }
+  $core.bool hasRemoteId() => $_has(0);
+  void clearRemoteId() => clearField(1);
+
+  $core.int get remoteMTUSize => $_get(1, 0);
+  set remoteMTUSize($core.int v) { $_setSignedInt32(1, v); }
+  $core.bool hasRemoteMTUSize() => $_has(1);
+  void clearRemoteMTUSize() => clearField(2);
 }
 
 class ReadCharacteristicRequest extends $pb.GeneratedMessage {
