@@ -1143,6 +1143,7 @@ typedef struct ProtosRequestMTURequest__storage_ {
 
 @dynamic remoteId;
 @dynamic remoteMtusize;
+@dynamic success;
 
 typedef struct ProtosRequestMTUResult__storage_ {
   uint32_t _has_storage_[1];
@@ -1173,6 +1174,15 @@ typedef struct ProtosRequestMTUResult__storage_ {
         .offset = (uint32_t)offsetof(ProtosRequestMTUResult__storage_, remoteMtusize),
         .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom),
         .dataType = GPBDataTypeInt32,
+      },
+      {
+        .name = "success",
+        .dataTypeSpecific.className = NULL,
+        .number = ProtosRequestMTUResult_FieldNumber_Success,
+        .hasIndex = 2,
+        .offset = 3,  // Stored in _has_storage_ to save space.
+        .flags = GPBFieldOptional,
+        .dataType = GPBDataTypeBool,
       },
     };
     GPBDescriptor *localDescriptor =

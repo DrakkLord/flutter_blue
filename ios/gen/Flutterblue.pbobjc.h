@@ -483,6 +483,7 @@ typedef GPB_ENUM(ProtosRequestMTURequest_FieldNumber) {
 typedef GPB_ENUM(ProtosRequestMTUResult_FieldNumber) {
   ProtosRequestMTUResult_FieldNumber_RemoteId = 1,
   ProtosRequestMTUResult_FieldNumber_RemoteMtusize = 2,
+  ProtosRequestMTUResult_FieldNumber_Success = 3,
 };
 
 @interface ProtosRequestMTUResult : GPBMessage
@@ -490,6 +491,8 @@ typedef GPB_ENUM(ProtosRequestMTUResult_FieldNumber) {
 @property(nonatomic, readwrite, copy, null_resettable) NSString *remoteId;
 
 @property(nonatomic, readwrite) int32_t remoteMtusize;
+
+@property(nonatomic, readwrite) BOOL success;
 
 @end
 

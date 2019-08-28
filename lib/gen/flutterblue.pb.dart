@@ -547,6 +547,7 @@ class RequestMTUResult extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('RequestMTUResult')
     ..aOS(1, 'remoteId')
     ..a<$core.int>(2, 'remoteMTUSize', $pb.PbFieldType.O3)
+    ..aOB(3, 'success')
     ..hasRequiredFields = false
   ;
 
@@ -573,6 +574,11 @@ class RequestMTUResult extends $pb.GeneratedMessage {
   set remoteMTUSize($core.int v) { $_setSignedInt32(1, v); }
   $core.bool hasRemoteMTUSize() => $_has(1);
   void clearRemoteMTUSize() => clearField(2);
+
+  $core.bool get success => $_get(2, false);
+  set success($core.bool v) { $_setBool(2, v); }
+  $core.bool hasSuccess() => $_has(2);
+  void clearSuccess() => clearField(3);
 }
 
 class ReadCharacteristicRequest extends $pb.GeneratedMessage {

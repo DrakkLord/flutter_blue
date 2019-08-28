@@ -153,6 +153,49 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     } @catch(FlutterError *e) {
       result(e);
     }
+  } else if([@"requestMTU" isEqualToString:call.method]) {
+      FlutterStandardTypedData *data = [call arguments];
+      ProtosRequestMTURequest *request = [[ProtosRequestMTURequest alloc] initWithData:[data data] error:nil];
+      
+      NSString *remoteId = [request remoteId];
+      int32_t localMTUSize = [request localMtusize];
+      
+      if (localMTUSize <= 0) {
+          result(nil);
+          return;
+      }
+
+      @try {
+          // Get negotiated MTU size
+          int32_t remoteMTU = 23;
+/*
+ // TODO(Adam): there is no way to get this on an iOS device so just skip it
+ //             the below implementation just gets the maximum by specification
+ //             which is not the result of the negotitation done automatically by the OS
+ 
+            CBPeripheral *peripheral = [self findPeripheral:remoteId];
+
+            if (@available(iOS 9.0, *)) {
+              // The difference between With- and Without- response is that With response uses 3 bytes extra
+              remoteMTU = (int32_t) [peripheral maximumWriteValueLengthForType:CBCharacteristicWriteWithResponse] + 3;
+              if (remoteMTU <= 23) {
+                  remoteMTU = 23;
+              }
+          }
+*/
+ 
+          // This completes the current request
+          result(nil);
+
+          // Response porto message
+          ProtosRequestMTUResult *result = [[ProtosRequestMTUResult alloc] init];
+          [result setRemoteId:remoteId];
+          [result setRemoteMtusize:remoteMTU];
+          [result setSuccess:true];
+          [_channel invokeMethod:@"RequestMTUResult" arguments:[self toFlutterData:result]];
+      } @catch(FlutterError *e) {
+          result(e);
+      }
   } else if([@"services" isEqualToString:call.method]) {
     NSString *remoteId = [call arguments];
     @try {

@@ -181,6 +181,7 @@ const RequestMTUResult$json = const {
   '2': const [
     const {'1': 'remote_id', '3': 1, '4': 1, '5': 9, '10': 'remoteId'},
     const {'1': 'remoteMTUSize', '3': 2, '4': 1, '5': 5, '10': 'remoteMTUSize'},
+    const {'1': 'success', '3': 3, '4': 1, '5': 8, '10': 'success'},
   ],
 };
 
