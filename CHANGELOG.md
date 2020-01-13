@@ -1,3 +1,8 @@
+## 0.7.0
+
+* Minimum Flutter SDK requirement: 1.12.13
+* Minimum rxDart requirement: 0.23.1
+
 ## 0.6.0+1
 * Documentation updates
 
