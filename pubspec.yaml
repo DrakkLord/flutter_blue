@@ -13,8 +13,8 @@ dependencies:
   flutter:
     sdk: flutter
   convert: '^2.1.1'
-  protobuf: '^0.13.12'
-  rxdart: ^0.23.1
+  protobuf: '^1.0.1'
+  rxdart: ^0.24.0
 
 flutter:
   plugin:
