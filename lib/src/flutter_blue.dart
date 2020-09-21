@@ -32,6 +32,10 @@ class FlutterBlue {
   Future<bool> get isAvailable =>
       _channel.invokeMethod('isAvailable').then<bool>((d) => d);
 
+  /// Checks whether the device supports Bluetooth server mode
+  Future<bool> get isServerAvailable =>
+      _channel.invokeMethod('isServerAvailable').then<bool>((d) => d);
+
   /// Checks if Bluetooth functionality is turned on
   Future<bool> get isOn => _channel.invokeMethod('isOn').then<bool>((d) => d);
 

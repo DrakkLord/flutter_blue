@@ -76,6 +76,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
     } else {
       result(@(NO));
     }
+  } else if([@"isServerAvailable" isEqualToString:call.method]) {
+    result(@(NO));
   } else if([@"isOn" isEqualToString:call.method]) {
     if(self.centralManager.state == CBManagerStatePoweredOn) {
       result(@(YES));
