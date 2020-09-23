@@ -49,6 +49,11 @@ message ScanResult {
   int32 rssi = 3;
 }
 
+message ServerAdvertisePayload {
+  string service_uuid = 1;
+  string instance_id = 2;
+}
+
 message ConnectRequest {
   string remote_id = 1;
   bool android_auto_connect = 2;

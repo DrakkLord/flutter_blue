@@ -230,6 +230,47 @@ class ScanResult extends $pb.GeneratedMessage {
   void clearRssi() => clearField(3);
 }
 
+class ServerAdvertisePayload extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('ServerAdvertisePayload', createEmptyInstance: create)
+    ..aOS(1, 'serviceUuid')
+    ..aOS(2, 'instanceId')
+    ..hasRequiredFields = false
+  ;
+
+  ServerAdvertisePayload._() : super();
+  factory ServerAdvertisePayload() => create();
+  factory ServerAdvertisePayload.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ServerAdvertisePayload.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  ServerAdvertisePayload clone() => ServerAdvertisePayload()..mergeFromMessage(this);
+  ServerAdvertisePayload copyWith(void Function(ServerAdvertisePayload) updates) => super.copyWith((message) => updates(message as ServerAdvertisePayload));
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ServerAdvertisePayload create() => ServerAdvertisePayload._();
+  ServerAdvertisePayload createEmptyInstance() => create();
+  static $pb.PbList<ServerAdvertisePayload> createRepeated() => $pb.PbList<ServerAdvertisePayload>();
+  @$core.pragma('dart2js:noInline')
+  static ServerAdvertisePayload getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ServerAdvertisePayload>(create);
+  static ServerAdvertisePayload _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get serviceUuid => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set serviceUuid($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasServiceUuid() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearServiceUuid() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get instanceId => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set instanceId($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasInstanceId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearInstanceId() => clearField(2);
+}
+
 class ConnectRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('ConnectRequest', createEmptyInstance: create)
     ..aOS(1, 'remoteId')

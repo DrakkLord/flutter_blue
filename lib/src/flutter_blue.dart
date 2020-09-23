@@ -42,6 +42,9 @@ class FlutterBlue {
   BehaviorSubject<bool> _isScanning = BehaviorSubject.seeded(false);
   Stream<bool> get isScanning => _isScanning.stream;
 
+  BehaviorSubject<bool> _isAdvertising = BehaviorSubject.seeded(false);
+  Stream<bool> get isAdvertising => _isAdvertising.stream;
+
   BehaviorSubject<List<ScanResult>> _scanResults = BehaviorSubject.seeded([]);
   Stream<List<ScanResult>> get scanResults => _scanResults.stream;
 
@@ -145,6 +148,57 @@ class FlutterBlue {
     _isScanning.add(false);
   }
 
+  /// Start advertisement of a service.
+  Future<bool> startAdvertisement(ServerAdvertisePayload payloadIn) async {
+    var payload = protos.ServerAdvertisePayload.create()
+      ..serviceUuid = payloadIn.service.toString()
+      ..instanceId = payloadIn.instanceID.toString();
+
+    if (_isAdvertising.value == true) {
+      throw Exception('Another advertisement is already in progress.');
+    }
+
+    // Emit to isScanning
+    _isAdvertising.add(true);
+
+    try {
+      await _channel.invokeMethod('startAdvertisement', payload.writeToBuffer());
+    } catch (e) {
+      print('Error starting advertisement.');
+      _isScanning.add(false);
+      throw e;
+    }
+
+    FlutterBlue.instance._methodStream
+        .where((m) => m.method == "AdvertisementResult")
+        .map((m) => m.arguments)
+        .map((buffer) => new protos.AdvertisementResult.fromBuffer(buffer))
+        .first;
+
+
+    /*
+        .takeUntil(Rx.merge(killStreams))
+        .doOnDone(stopAdvertisement)
+        .map((buffer) => new protos.ScanResult.fromBuffer(buffer))
+        .map((p) {
+      final result = new ScanResult.fromProto(p);
+      final list = _scanResults.value;
+      int index = list.indexOf(result);
+      if (index != -1) {
+        list[index] = result;
+      } else {
+        list.add(result);
+      }
+      _scanResults.add(list);
+      return result;
+    });*/
+  }
+
+  /// Stop active advertisement, if none is running this acts as no-op
+  Future stopAdvertisement() async {
+    await _channel.invokeMethod('stopAdvertisement');
+  }
+
   /// The list of connected peripherals can include those that are connected
   /// by other apps and that will need to be connected locally using the
   /// device.connect() method before they can be used.
@@ -213,6 +267,13 @@ class DeviceIdentifier {
   @override
   bool operator ==(other) =>
       other is DeviceIdentifier && compareAsciiLowerCase(id, other.id) == 0;
+}
+
+class ServerAdvertisePayload {
+  final Guid service;
+  final Guid instanceID;
+
+  const ServerAdvertisePayload(this.service, this.instanceID);
 }
 
 class ScanResult {

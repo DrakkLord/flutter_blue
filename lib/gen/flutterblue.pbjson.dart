@@ -81,6 +81,14 @@ const ScanResult$json = const {
   ],
 };
 
+const ServerAdvertisePayload$json = const {
+  '1': 'ServerAdvertisePayload',
+  '2': const [
+    const {'1': 'service_uuid', '3': 1, '4': 1, '5': 9, '10': 'serviceUuid'},
+    const {'1': 'instance_id', '3': 2, '4': 1, '5': 9, '10': 'instanceId'},
+  ],
+};
+
 const ConnectRequest$json = const {
   '1': 'ConnectRequest',
   '2': const [
