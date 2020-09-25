@@ -89,6 +89,14 @@ const ServerAdvertisePayload$json = const {
   ],
 };
 
+const ServerAdvertiseResult$json = const {
+  '1': 'ServerAdvertiseResult',
+  '2': const [
+    const {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    const {'1': 'errorCode', '3': 2, '4': 1, '5': 5, '10': 'errorCode'},
+  ],
+};
+
 const ConnectRequest$json = const {
   '1': 'ConnectRequest',
   '2': const [

@@ -150,13 +150,13 @@ class FlutterBlue {
 
   /// Start advertisement of a service.
   Future<bool> startAdvertisement(ServerAdvertisePayload payloadIn) async {
-    var payload = protos.ServerAdvertisePayload.create()
-      ..serviceUuid = payloadIn.service.toString()
-      ..instanceId = payloadIn.instanceID.toString();
-
     if (_isAdvertising.value == true) {
       throw Exception('Another advertisement is already in progress.');
     }
+
+    var payload = protos.ServerAdvertisePayload.create()
+      ..serviceUuid = payloadIn.service.toString()
+      ..instanceId = payloadIn.instanceID.toString();
 
     // Emit to isScanning
     _isAdvertising.add(true);
@@ -165,37 +165,34 @@ class FlutterBlue {
       await _channel.invokeMethod('startAdvertisement', payload.writeToBuffer());
     } catch (e) {
       print('Error starting advertisement.');
-      _isScanning.add(false);
+      _isAdvertising.add(false);
       throw e;
     }
 
-    FlutterBlue.instance._methodStream
-        .where((m) => m.method == "AdvertisementResult")
+    final result = await FlutterBlue.instance._methodStream
+        .where((m) => m.method == "ServerAdvertiseResult")
         .map((m) => m.arguments)
-        .map((buffer) => new protos.AdvertisementResult.fromBuffer(buffer))
+        .map((buffer) => new protos.ServerAdvertiseResult.fromBuffer(buffer))
         .first;
 
+    if (result == null) {
+      _isAdvertising.add(false);
+      throw Exception('Failed to receive advertisement result when starting.');
+    }
+    if (!result.success) {
+      _isAdvertising.add(false);
+      print('Failed to start advertisement, error code: ${result.errorCode}.');
+      return false;
+    }
 
-    /*
-        .takeUntil(Rx.merge(killStreams))
-        .doOnDone(stopAdvertisement)
-        .map((buffer) => new protos.ScanResult.fromBuffer(buffer))
-        .map((p) {
-      final result = new ScanResult.fromProto(p);
-      final list = _scanResults.value;
-      int index = list.indexOf(result);
-      if (index != -1) {
-        list[index] = result;
-      } else {
-        list.add(result);
-      }
-      _scanResults.add(list);
-      return result;
-    });*/
+    return true;
   }
 
   /// Stop active advertisement, if none is running this acts as no-op
   Future stopAdvertisement() async {
+    if (_isAdvertising.value == false) {
+      return;
+    }
     await _channel.invokeMethod('stopAdvertisement');
   }
 

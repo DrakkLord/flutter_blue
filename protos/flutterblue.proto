@@ -54,6 +54,11 @@ message ServerAdvertisePayload {
   string instance_id = 2;
 }
 
+message ServerAdvertiseResult {
+	bool success = 1;
+	int32 errorCode = 2;
+}
+
 message ConnectRequest {
   string remote_id = 1;
   bool android_auto_connect = 2;

@@ -271,6 +271,47 @@ class ServerAdvertisePayload extends $pb.GeneratedMessage {
   void clearInstanceId() => clearField(2);
 }
 
+class ServerAdvertiseResult extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('ServerAdvertiseResult', createEmptyInstance: create)
+    ..aOB(1, 'success')
+    ..a<$core.int>(2, 'errorCode', $pb.PbFieldType.O3, protoName: 'errorCode')
+    ..hasRequiredFields = false
+  ;
+
+  ServerAdvertiseResult._() : super();
+  factory ServerAdvertiseResult() => create();
+  factory ServerAdvertiseResult.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ServerAdvertiseResult.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  ServerAdvertiseResult clone() => ServerAdvertiseResult()..mergeFromMessage(this);
+  ServerAdvertiseResult copyWith(void Function(ServerAdvertiseResult) updates) => super.copyWith((message) => updates(message as ServerAdvertiseResult));
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ServerAdvertiseResult create() => ServerAdvertiseResult._();
+  ServerAdvertiseResult createEmptyInstance() => create();
+  static $pb.PbList<ServerAdvertiseResult> createRepeated() => $pb.PbList<ServerAdvertiseResult>();
+  @$core.pragma('dart2js:noInline')
+  static ServerAdvertiseResult getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ServerAdvertiseResult>(create);
+  static ServerAdvertiseResult _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool v) { $_setBool(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get errorCode => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set errorCode($core.int v) { $_setSignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasErrorCode() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearErrorCode() => clearField(2);
+}
+
 class ConnectRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('ConnectRequest', createEmptyInstance: create)
     ..aOS(1, 'remoteId')

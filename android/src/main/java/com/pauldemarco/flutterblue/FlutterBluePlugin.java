@@ -16,6 +16,10 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.le.AdvertiseCallback;
+import android.bluetooth.le.AdvertiseData;
+import android.bluetooth.le.AdvertiseSettings;
+import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
@@ -33,6 +37,7 @@ import android.util.Log;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +77,10 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
     // Pending call and result for startScan, in the case where permissions are needed
     private MethodCall pendingCall;
     private Result pendingResult;
+
+    // advertisement
+    private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
+    private boolean mServiceAdvertised;
 
     /**
      * Plugin registration.
@@ -175,6 +184,19 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
             case "stopScan":
             {
                 stopScan();
+                result.success(null);
+                break;
+            }
+
+            case "startAdvertisement":
+            {
+                startAdvertisement(call, result);
+                break;
+            }
+
+            case "stopAdvertisement":
+            {
+                stopAdvertisement();
                 result.success(null);
                 break;
             }
@@ -751,6 +773,102 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
         mBluetoothAdapter.stopLeScan(getScanCallback18());
     }
 
+    private void startAdvertisement(MethodCall call, Result result) {
+        if (mServiceAdvertised) {
+            result.error("bluetooth_advertisement_error",
+                    "advertisement already started",
+                    null);
+            return;
+        }
+
+        byte[] data = call.arguments();
+        Protos.ServerAdvertisePayload payload;
+        try {
+            payload = Protos.ServerAdvertisePayload.newBuilder().mergeFrom(data).build();
+        } catch (InvalidProtocolBufferException e) {
+            result.error("RuntimeException", e.getMessage(), e);
+            return;
+        }
+
+        if (payload.getServiceUuid() == null) {
+            result.error("bluetooth_advertisement_error",
+                    "start advertisement must have service UUID set!",
+                    null);
+            return;
+        }
+        if (payload.getServiceUuid().isEmpty()) {
+            result.error("bluetooth_advertisement_error",
+                    "start advertisement must have service UUID set!",
+                    null);
+            return;
+        }
+
+        mServiceAdvertised = false;
+        mBluetoothLeAdvertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
+        if (mBluetoothLeAdvertiser == null) {
+            result.error("bluetooth_advertisement_error",
+                    "unable to start advertisement, failed to get bluetooth le advertiser!",
+                    null);
+            return;
+        }
+
+        final AdvertiseSettings settings = new AdvertiseSettings.Builder()
+                .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
+                .setConnectable(true)
+                .setTimeout(0)
+                .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM)
+                .build();
+
+        final ParcelUuid serviceUUID = ParcelUuid.fromString(payload.getServiceUuid());
+        final AdvertiseData advrData = new AdvertiseData.Builder()
+                .setIncludeDeviceName(false)
+                .setIncludeTxPowerLevel(false)
+                .addServiceUuid(serviceUUID)
+                .build();
+
+        final AdvertiseData.Builder scanResponseBuilder = new AdvertiseData.Builder()
+                .setIncludeDeviceName(false)
+                .setIncludeTxPowerLevel(false);
+
+        if (!payload.getInstanceIdBytes().isEmpty()) {
+            final ParcelUuid parcelUuid = ParcelUuid.fromString(payload.getInstanceId());
+            scanResponseBuilder.addServiceData(serviceUUID, uuidToBytes(parcelUuid.getUuid()));
+        }
+        final AdvertiseData scanResponse = scanResponseBuilder.build();
+
+        mBluetoothLeAdvertiser.startAdvertising(settings, advrData, scanResponse, mAdvertiseCallback);
+    }
+
+    private void stopAdvertisement() {
+        mServiceAdvertised = false;
+        if (mBluetoothLeAdvertiser != null) {
+            mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
+            mBluetoothLeAdvertiser = null;
+        }
+    }
+
+    private AdvertiseCallback mAdvertiseCallback = new AdvertiseCallback() {
+        @Override
+        public void onStartSuccess(AdvertiseSettings settingsInEffect) {
+            mServiceAdvertised = true;
+
+            Protos.ServerAdvertiseResult.Builder advertiseResult = Protos.ServerAdvertiseResult.newBuilder();
+            advertiseResult.setSuccess(true);
+            advertiseResult.setErrorCode(0);
+            invokeMethodUIThread("ServerAdvertiseResult", advertiseResult.build().toByteArray());
+        }
+
+        @Override
+        public void onStartFailure(int errorCode) {
+            mServiceAdvertised = false;
+
+            Protos.ServerAdvertiseResult.Builder advertiseResult = Protos.ServerAdvertiseResult.newBuilder();
+            advertiseResult.setSuccess(false);
+            advertiseResult.setErrorCode(errorCode);
+            invokeMethodUIThread("ServerAdvertiseResult", advertiseResult.build().toByteArray());
+        }
+    };
+
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -907,4 +1025,10 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 });
     }
 
+    private byte[] uuidToBytes(UUID uid) {
+        final ByteBuffer buffer = ByteBuffer.allocate((Long.SIZE / Byte.SIZE) * 2);
+        buffer.putLong(uid.getMostSignificantBits());
+        buffer.putLong(uid.getLeastSignificantBits());
+        return buffer.array();
+    }
 }

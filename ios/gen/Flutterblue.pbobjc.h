@@ -282,6 +282,21 @@ GPB_FINAL @interface ProtosServerAdvertisePayload : GPBMessage
 
 @end
 
+#pragma mark - ProtosServerAdvertiseResult
+
+typedef GPB_ENUM(ProtosServerAdvertiseResult_FieldNumber) {
+  ProtosServerAdvertiseResult_FieldNumber_Success = 1,
+  ProtosServerAdvertiseResult_FieldNumber_ErrorCode = 2,
+};
+
+GPB_FINAL @interface ProtosServerAdvertiseResult : GPBMessage
+
+@property(nonatomic, readwrite) BOOL success;
+
+@property(nonatomic, readwrite) int32_t errorCode;
+
+@end
+
 #pragma mark - ProtosConnectRequest
 
 typedef GPB_ENUM(ProtosConnectRequest_FieldNumber) {
