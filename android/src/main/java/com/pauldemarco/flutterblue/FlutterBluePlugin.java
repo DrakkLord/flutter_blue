@@ -832,11 +832,13 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
 
         if (!payload.getInstanceIdBytes().isEmpty()) {
             final ParcelUuid parcelUuid = ParcelUuid.fromString(payload.getInstanceId());
-            scanResponseBuilder.addServiceData(serviceUUID, uuidToBytes(parcelUuid.getUuid()));
+//            scanResponseBuilder.addServiceUuid(parcelUuid);
+            scanResponseBuilder.addManufacturerData (1, uuidToBytes(parcelUuid.getUuid()));
         }
         final AdvertiseData scanResponse = scanResponseBuilder.build();
 
         mBluetoothLeAdvertiser.startAdvertising(settings, advrData, scanResponse, mAdvertiseCallback);
+        result.success(null);
     }
 
     private void stopAdvertisement() {

@@ -194,6 +194,7 @@ class FlutterBlue {
       return;
     }
     await _channel.invokeMethod('stopAdvertisement');
+    _isAdvertising.value = false;
   }
 
   /// The list of connected peripherals can include those that are connected
