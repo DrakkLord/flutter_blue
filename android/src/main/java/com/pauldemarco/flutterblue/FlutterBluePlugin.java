@@ -832,7 +832,6 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
 
         if (!payload.getInstanceIdBytes().isEmpty()) {
             final ParcelUuid parcelUuid = ParcelUuid.fromString(payload.getInstanceId());
-//            scanResponseBuilder.addServiceUuid(parcelUuid);
             scanResponseBuilder.addManufacturerData (1, uuidToBytes(parcelUuid.getUuid()));
         }
         final AdvertiseData scanResponse = scanResponseBuilder.build();
@@ -842,11 +841,13 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
     }
 
     private void stopAdvertisement() {
-        mServiceAdvertised = false;
         if (mBluetoothLeAdvertiser != null) {
-            mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
+            if (mServiceAdvertised) {
+                mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
+            }
             mBluetoothLeAdvertiser = null;
         }
+        mServiceAdvertised = false;
     }
 
     private AdvertiseCallback mAdvertiseCallback = new AdvertiseCallback() {

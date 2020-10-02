@@ -164,8 +164,8 @@ class FlutterBlue {
     try {
       await _channel.invokeMethod('startAdvertisement', payload.writeToBuffer());
     } catch (e) {
-      print('Error starting advertisement.');
       _isAdvertising.add(false);
+      print('Error starting advertisement.');
       throw e;
     }
 
