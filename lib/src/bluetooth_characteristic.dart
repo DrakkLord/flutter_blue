@@ -42,6 +42,34 @@ class BluetoothCharacteristic {
         properties = new CharacteristicProperties.fromProto(p.properties),
         _value = BehaviorSubject.seeded(p.value);
 
+  protos.BluetoothCharacteristic toProto() {
+    final chrs = protos.BluetoothCharacteristic.create();
+
+    chrs.uuid = uuid.toString();
+    chrs.remoteId = deviceId.id;
+    chrs.serviceUuid = serviceUuid.toString();
+    chrs.secondaryServiceUuid = secondaryServiceUuid.toString();
+    for (final desc in descriptors) {
+      chrs.descriptors.add(desc.toProto());
+    }
+    chrs.properties = properties.toProto();
+    chrs.value = _value.value;
+
+    return chrs;
+  }
+
+  BluetoothCharacteristic.forServer(Guid uuid,
+                                    CharacteristicProperties properties,
+                                    { List<BluetoothDescriptor> descriptors,
+                                      List<int> initialValue })
+      : uuid = uuid,
+        deviceId = DeviceIdentifier(''),
+        serviceUuid = Guid.empty(),
+        secondaryServiceUuid = Guid.empty(),
+        properties = properties,
+        descriptors = <BluetoothDescriptor>[]..addAll(descriptors??<BluetoothDescriptor>[]),
+        _value = BehaviorSubject.seeded(initialValue??<int>[]);
+  
   Stream<BluetoothCharacteristic> get _onCharacteristicChangedStream =>
       FlutterBlue.instance._methodStream
           .where((m) => m.method == "OnCharacteristicChanged")
@@ -212,4 +240,19 @@ class CharacteristicProperties {
         extendedProperties = p.extendedProperties,
         notifyEncryptionRequired = p.notifyEncryptionRequired,
         indicateEncryptionRequired = p.indicateEncryptionRequired;
+
+  protos.CharacteristicProperties toProto() {
+    final cp = protos.CharacteristicProperties.create();
+    cp.broadcast = broadcast;
+    cp.read = read;
+    cp.writeWithoutResponse = writeWithoutResponse;
+    cp.write = write;
+    cp.notify = notify;
+    cp.indicate = indicate;
+    cp.authenticatedSignedWrites = authenticatedSignedWrites;
+    cp.extendedProperties = extendedProperties;
+    cp.notifyEncryptionRequired = notifyEncryptionRequired;
+    cp.indicateEncryptionRequired = indicateEncryptionRequired;
+    return cp;
+  }
 }

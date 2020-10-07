@@ -28,7 +28,8 @@
 package com.pauldemarco.flutterblue;
 
 import com.google.protobuf.ByteString;
-import com.pauldemarco.flutterblue.Protos.AdvertisementData;
+import com.pauldemarco.flutter_blue.Protos;
+import com.pauldemarco.flutter_blue.Protos.AdvertisementData;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;

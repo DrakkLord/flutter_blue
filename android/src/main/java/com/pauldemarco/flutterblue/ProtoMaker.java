@@ -20,6 +20,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.google.protobuf.ByteString;
+import com.pauldemarco.flutter_blue.Protos;
 
 import java.util.Iterator;
 import java.util.List;

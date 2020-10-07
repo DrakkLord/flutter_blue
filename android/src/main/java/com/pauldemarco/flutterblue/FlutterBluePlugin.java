@@ -13,6 +13,8 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattServer;
+import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
@@ -36,6 +38,7 @@ import android.util.Log;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.pauldemarco.flutter_blue.Protos;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -81,6 +84,10 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
     // advertisement
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     private boolean mServiceAdvertised;
+
+    // server
+    private BluetoothGattServer mBluetoothGattServer;
+    private boolean mServerActive;
 
     /**
      * Plugin registration.
@@ -197,6 +204,19 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
             case "stopAdvertisement":
             {
                 stopAdvertisement();
+                result.success(null);
+                break;
+            }
+
+            case "startServer":
+            {
+                startServer(call, result);
+                break;
+            }
+
+            case "stopServer":
+            {
+                stopServer();
                 result.success(null);
                 break;
             }
@@ -850,6 +870,70 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
         mServiceAdvertised = false;
     }
 
+    private void startServer(MethodCall call, Result result) {
+        if (mServerActive) {
+            result.error("bluetooth_server_error",
+                    "server already started",
+                    null);
+            return;
+        }
+
+        byte[] data = call.arguments();
+        Protos.BluetoothService payload;
+        try {
+            payload = Protos.BluetoothService.newBuilder().mergeFrom(data).build();
+        } catch (InvalidProtocolBufferException e) {
+            result.error("RuntimeException", e.getMessage(), e);
+            return;
+        }
+
+        if (payload.getUuid() == null) {
+            result.error("bluetooth_server_error",
+                    "start server must have root service UUID set!",
+                    null);
+            return;
+        }
+        if (payload.getUuid().isEmpty()) {
+            result.error("bluetooth_server_error",
+                    "start server must have root service UUID set!",
+                    null);
+            return;
+        }
+
+        final BluetoothGattService service = ServiceBuilder.serviceFromProtoMessage(payload, result);
+        if (service == null) {
+            // NOTE: result error state already set!
+            return;
+        }
+
+        mBluetoothGattServer = mBluetoothManager.openGattServer(activity.getApplicationContext(), mGattServerCallback);
+        if (mBluetoothGattServer == null) {
+            result.error("bluetooth_server_error",
+                    "start server failed to open gatt server!",
+                    null);
+            return;
+        }
+
+        if (!mBluetoothGattServer.addService(service)) {
+            mBluetoothGattServer.close();
+            mBluetoothGattServer = null;
+
+            result.error("bluetooth_server_error",
+                    "start server failed to add gatt service to server!",
+                    null);
+            return;
+        }
+
+        result.success(null);
+    }
+
+    private void stopServer() {
+        if (mBluetoothGattServer != null) {
+            mBluetoothGattServer.close();
+        }
+        mServerActive = false;
+    }
+
     private AdvertiseCallback mAdvertiseCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
@@ -869,6 +953,29 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
             advertiseResult.setSuccess(false);
             advertiseResult.setErrorCode(errorCode);
             invokeMethodUIThread("ServerAdvertiseResult", advertiseResult.build().toByteArray());
+        }
+    };
+
+    private BluetoothGattServerCallback mGattServerCallback = new BluetoothGattServerCallback() {
+        // TODO
+
+        @Override
+        public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
+            super.onConnectionStateChange(device, status, newState);
+            // TODO this is just a test
+            String stateText = "";
+            switch(newState) {
+                case BluetoothProfile.STATE_DISCONNECTED:
+                    stateText = "DISCONNECTED";
+                    break;
+                case BluetoothProfile.STATE_CONNECTED:
+                    stateText = "CONNECTED";
+                    break;
+                default:
+                    stateText = "UNKOWN STATE ( " + newState + " )";
+                    break;
+            }
+            Log.e("FlutterBlue-CUSTOM", "device state changed: " + device.toString() + ", state: " + stateText);
         }
     };
 

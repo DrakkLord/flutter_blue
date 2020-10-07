@@ -24,6 +24,26 @@ class BluetoothDescriptor {
         characteristicUuid = new Guid(p.characteristicUuid),
         _value = BehaviorSubject.seeded(p.value);
 
+  protos.BluetoothDescriptor toProto() {
+    final desc = protos.BluetoothDescriptor.create();
+
+    desc.uuid = uuid.toString();
+    desc.remoteId = deviceId.id;
+    desc.serviceUuid = serviceUuid.toString();
+    desc.characteristicUuid = characteristicUuid.toString();
+    desc.value = _value.value;
+
+    return desc;
+  }
+
+  BluetoothDescriptor.forServer(Guid uuid,
+                                { List<int> initialValue })
+      : uuid = uuid,
+        deviceId = DeviceIdentifier(''),
+        serviceUuid = Guid.empty(),
+        characteristicUuid = Guid.empty(),
+        _value = BehaviorSubject.seeded(initialValue??<int>[]);
+
   /// Retrieves the value of a specified descriptor
   Future<List<int>> read() async {
     var request = protos.ReadDescriptorRequest.create()

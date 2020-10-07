@@ -45,6 +45,9 @@ class FlutterBlue {
   BehaviorSubject<bool> _isAdvertising = BehaviorSubject.seeded(false);
   Stream<bool> get isAdvertising => _isAdvertising.stream;
 
+  BehaviorSubject<bool> _isServerRunning = BehaviorSubject.seeded(false);
+  Stream<bool> get isServerRunning => _isServerRunning.stream;
+
   BehaviorSubject<List<ScanResult>> _scanResults = BehaviorSubject.seeded([]);
   Stream<List<ScanResult>> get scanResults => _scanResults.stream;
 
@@ -195,6 +198,41 @@ class FlutterBlue {
     }
     await _channel.invokeMethod('stopAdvertisement');
     _isAdvertising.value = false;
+  }
+
+  Future startServer(BluetoothService service) async {
+    if (_isServerRunning.value == true) {
+      throw Exception('Another server is already running.');
+    }
+
+    if (service.uuid == null) {
+      throw Exception('Start server main service uuid is null');
+    }
+
+    var payload = service.toProto();
+
+    // Emit to isScanning
+    _isServerRunning.add(true);
+
+    try {
+      await _channel.invokeMethod('startServer', payload.writeToBuffer());
+    } catch (e) {
+      _isServerRunning.add(false);
+      print('Error starting server.');
+      throw e;
+    }
+
+    // TODO recieve return value by the method channel
+
+    return true;
+  }
+
+  Future stopServer() async {
+    if (_isServerRunning.value == false) {
+      return;
+    }
+    await _channel.invokeMethod('stopServer');
+    _isServerRunning.value = false;
   }
 
   /// The list of connected peripherals can include those that are connected

@@ -21,4 +21,32 @@ class BluetoothService {
         includedServices = p.includedServices
             .map((s) => new BluetoothService.fromProto(s))
             .toList();
+
+  protos.BluetoothService toProto() {
+    final serviceRoot = protos.BluetoothService.create();
+
+    serviceRoot.uuid = uuid.toString();
+    serviceRoot.remoteId = deviceId.id;
+    serviceRoot.isPrimary = isPrimary;
+
+    for (final chrs in characteristics) {
+      serviceRoot.characteristics.add(chrs.toProto());
+    }
+
+    for (final srvc in includedServices) {
+      serviceRoot.includedServices.add(srvc.toProto());
+    }
+
+    return serviceRoot;
+  }
+
+  BluetoothService.forServer(Guid uuid,
+                             List<BluetoothCharacteristic> characteristics,
+                              { bool isPrimary = true,
+                                List<BluetoothService> includedServices })
+  : uuid = uuid,
+        deviceId = DeviceIdentifier(''),
+        isPrimary = isPrimary,
+        characteristics = <BluetoothCharacteristic>[]..addAll(characteristics??<BluetoothCharacteristic>[]),
+        includedServices = <BluetoothService>[]..addAll(includedServices??<BluetoothService>[]);
 }
