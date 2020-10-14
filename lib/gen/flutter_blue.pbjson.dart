@@ -125,6 +125,14 @@ const BluetoothDevice_Type$json = const {
   ],
 };
 
+const BluetoothServerDevice$json = const {
+  '1': 'BluetoothServerDevice',
+  '2': const [
+    const {'1': 'device', '3': 1, '4': 1, '5': 11, '6': '.BluetoothDevice', '10': 'device'},
+    const {'1': 'connected', '3': 2, '4': 1, '5': 8, '10': 'connected'},
+  ],
+};
+
 const BluetoothService$json = const {
   '1': 'BluetoothService',
   '2': const [

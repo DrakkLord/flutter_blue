@@ -118,6 +118,16 @@ public class ProtoMaker {
         return p.build();
     }
 
+    static Protos.BluetoothServerDevice from(BluetoothDevice device, boolean isConnected) {
+        final Protos.BluetoothDevice protoDevice = from(device);
+
+        final Protos.BluetoothServerDevice.Builder p = Protos.BluetoothServerDevice.newBuilder();
+        p.setConnected(isConnected);
+        p.setDevice(protoDevice);
+
+        return p.build();
+    }
+
     static Protos.BluetoothService from(BluetoothDevice device, BluetoothGattService service, BluetoothGatt gatt) {
         Protos.BluetoothService.Builder p = Protos.BluetoothService.newBuilder();
         p.setRemoteId(device.getAddress());

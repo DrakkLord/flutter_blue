@@ -77,6 +77,11 @@ message BluetoothDevice {
   Type type = 3;
 }
 
+message BluetoothServerDevice {
+  BluetoothDevice device = 1;
+  bool connected = 2;
+}
+
 message BluetoothService {
   string uuid = 1;
   string remote_id = 2;

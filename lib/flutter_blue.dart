@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:convert/convert.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_blue/src/bluetooth_server_device.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -21,3 +22,4 @@ part 'src/bluetooth_service.dart';
 part 'src/constants.dart';
 part 'src/flutter_blue.dart';
 part 'src/guid.dart';
+part 'src/bluetooth_server_device.dart';

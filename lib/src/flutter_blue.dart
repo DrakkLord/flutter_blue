@@ -47,6 +47,7 @@ class FlutterBlue {
 
   BehaviorSubject<bool> _isServerRunning = BehaviorSubject.seeded(false);
   Stream<bool> get isServerRunning => _isServerRunning.stream;
+  Map<DeviceIdentifier, BluetoothDevice> _serverDevices = Map<DeviceIdentifier, BluetoothDevice>();
 
   BehaviorSubject<List<ScanResult>> _scanResults = BehaviorSubject.seeded([]);
   Stream<List<ScanResult>> get scanResults => _scanResults.stream;
@@ -200,7 +201,7 @@ class FlutterBlue {
     _isAdvertising.value = false;
   }
 
-  Future startServer(BluetoothService service) async {
+  Stream<BluetoothServerDevice> startServer(BluetoothService service) async* {
     if (_isServerRunning.value == true) {
       throw Exception('Another server is already running.');
     }
@@ -222,15 +223,41 @@ class FlutterBlue {
       throw e;
     }
 
-    // TODO recieve return value by the method channel
+    yield* FlutterBlue.instance._methodStream.where((m) => m.method == "ServerDeviceState").map((m) => m.arguments)
+        .doOnDone(stopServer)
+        .map((buffer) => new protos.BluetoothServerDevice.fromBuffer(buffer))
+        .map((protoObj) {
+          final device = BluetoothDevice.fromProto(protoObj.device);
 
-    return true;
+          if (_serverDevices.containsKey(device.id)) {
+            final storedDevice = _serverDevices[device.id];
+            if (storedDevice == null) {
+              throw Exception('Stored bluetooth device for id[${device.id}] doesn\'t exist');
+            }
+
+            if (!protoObj.connected) {
+              storedDevice.disconnect();
+            }
+            return BluetoothServerDevice(storedDevice, protoObj.connected);
+          }
+
+          // TODO setup for server usage ( disable service discovery for example, should be already connected )
+
+          _serverDevices[device.id] = device;
+          return BluetoothServerDevice(device, protoObj.connected);
+        });
   }
 
   Future stopServer() async {
     if (_isServerRunning.value == false) {
       return;
     }
+
+    for (final device in _serverDevices.values) {
+      await device.disconnect();
+    }
+    _serverDevices.clear();
+
     await _channel.invokeMethod('stopServer');
     _isServerRunning.value = false;
   }

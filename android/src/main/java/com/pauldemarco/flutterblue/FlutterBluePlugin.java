@@ -962,20 +962,13 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
         @Override
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
             super.onConnectionStateChange(device, status, newState);
-            // TODO this is just a test
-            String stateText = "";
-            switch(newState) {
-                case BluetoothProfile.STATE_DISCONNECTED:
-                    stateText = "DISCONNECTED";
-                    break;
-                case BluetoothProfile.STATE_CONNECTED:
-                    stateText = "CONNECTED";
-                    break;
-                default:
-                    stateText = "UNKOWN STATE ( " + newState + " )";
-                    break;
-            }
-            Log.e("FlutterBlue-CUSTOM", "device state changed: " + device.toString() + ", state: " + stateText);
+            invokeMethodUIThread("ServerDeviceState",
+                                  ProtoMaker.from(device, newState == BluetoothProfile.STATE_CONNECTED).toByteArray());
+        }
+
+        @Override
+        public void onDescriptorReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattDescriptor descriptor) {
+            super.onDescriptorReadRequest(device, requestId, offset, descriptor);
         }
     };
 

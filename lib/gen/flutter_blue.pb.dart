@@ -404,6 +404,49 @@ class BluetoothDevice extends $pb.GeneratedMessage {
   void clearType() => clearField(3);
 }
 
+class BluetoothServerDevice extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo('BluetoothServerDevice', createEmptyInstance: create)
+    ..aOM<BluetoothDevice>(1, 'device', subBuilder: BluetoothDevice.create)
+    ..aOB(2, 'connected')
+    ..hasRequiredFields = false
+  ;
+
+  BluetoothServerDevice._() : super();
+  factory BluetoothServerDevice() => create();
+  factory BluetoothServerDevice.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory BluetoothServerDevice.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  BluetoothServerDevice clone() => BluetoothServerDevice()..mergeFromMessage(this);
+  BluetoothServerDevice copyWith(void Function(BluetoothServerDevice) updates) => super.copyWith((message) => updates(message as BluetoothServerDevice));
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static BluetoothServerDevice create() => BluetoothServerDevice._();
+  BluetoothServerDevice createEmptyInstance() => create();
+  static $pb.PbList<BluetoothServerDevice> createRepeated() => $pb.PbList<BluetoothServerDevice>();
+  @$core.pragma('dart2js:noInline')
+  static BluetoothServerDevice getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BluetoothServerDevice>(create);
+  static BluetoothServerDevice _defaultInstance;
+
+  @$pb.TagNumber(1)
+  BluetoothDevice get device => $_getN(0);
+  @$pb.TagNumber(1)
+  set device(BluetoothDevice v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasDevice() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDevice() => clearField(1);
+  @$pb.TagNumber(1)
+  BluetoothDevice ensureDevice() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $core.bool get connected => $_getBF(1);
+  @$pb.TagNumber(2)
+  set connected($core.bool v) { $_setBool(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasConnected() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearConnected() => clearField(2);
+}
+
 class BluetoothService extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('BluetoothService', createEmptyInstance: create)
     ..aOS(1, 'uuid')
