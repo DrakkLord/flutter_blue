@@ -14,6 +14,13 @@ class BluetoothDevice {
         name = p.name,
         type = BluetoothDeviceType.values[p.type.value];
 
+  protos.BluetoothDevice toProto() {
+    return protos.BluetoothDevice.create()
+      ..remoteId = id.id
+      ..name = name
+      ..type = BluetoothDevice_Type.valueOf(type.index);
+  }
+
   BehaviorSubject<bool> _isDiscoveringServices = BehaviorSubject.seeded(false);
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 
