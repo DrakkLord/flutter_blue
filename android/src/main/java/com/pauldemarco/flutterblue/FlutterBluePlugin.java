@@ -160,7 +160,8 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
 
             case "isServerAvailable":
             {
-                result.success(mBluetoothAdapter != null);
+                final BluetoothLeAdvertiser advertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
+                result.success(mBluetoothAdapter != null && advertiser != null);
                 break;
             }
 
@@ -964,11 +965,6 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
             super.onConnectionStateChange(device, status, newState);
             invokeMethodUIThread("ServerDeviceState",
                                   ProtoMaker.from(device, newState == BluetoothProfile.STATE_CONNECTED).toByteArray());
-        }
-
-        @Override
-        public void onDescriptorReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattDescriptor descriptor) {
-            super.onDescriptorReadRequest(device, requestId, offset, descriptor);
         }
     };
 

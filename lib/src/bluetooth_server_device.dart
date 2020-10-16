@@ -1,5 +1,4 @@
-
-import 'package:flutter_blue/flutter_blue.dart';
+part of flutter_blue;
 
 class BluetoothServerDevice {
   final BluetoothDevice device;
