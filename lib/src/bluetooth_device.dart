@@ -9,6 +9,10 @@ class BluetoothDevice {
   final String name;
   final BluetoothDeviceType type;
 
+  factory BluetoothDevice.fromBuffer(List<int> data) {
+    return BluetoothDevice.fromProto(protos.BluetoothDevice.fromBuffer(data));
+  }
+
   BluetoothDevice.fromProto(protos.BluetoothDevice p)
       : id = new DeviceIdentifier(p.remoteId),
         name = p.name,
