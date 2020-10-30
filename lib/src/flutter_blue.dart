@@ -47,7 +47,7 @@ class FlutterBlue {
 
   BehaviorSubject<bool> _isServerRunning = BehaviorSubject.seeded(false);
   Stream<bool> get isServerRunning => _isServerRunning.stream;
-  Map<DeviceIdentifier, BluetoothDevice> _serverDevices = Map<DeviceIdentifier, BluetoothDevice>();
+  Map<DeviceIdentifier, BluetoothDeviceServer> _serverDevices = Map<DeviceIdentifier, BluetoothDeviceServer>();
 
   BehaviorSubject<List<ScanResult>> _scanResults = BehaviorSubject.seeded([]);
   Stream<List<ScanResult>> get scanResults => _scanResults.stream;
@@ -201,7 +201,7 @@ class FlutterBlue {
     _isAdvertising.value = false;
   }
 
-  Stream<BluetoothServerDevice> startServer(BluetoothService service) async* {
+  Stream<BluetoothServerDeviceContainer> startServer(BluetoothService service) async* {
     if (_isServerRunning.value == true) {
       throw Exception('Another server is already running.');
     }
@@ -227,34 +227,26 @@ class FlutterBlue {
         .doOnDone(stopServer)
         .map((buffer) => new protos.BluetoothServerDevice.fromBuffer(buffer))
         .map((protoObj) {
-          final device = BluetoothDevice.fromProto(protoObj.device);
+          final device = BluetoothDeviceServer.fromProto(protoObj.device);
 
           if (_serverDevices.containsKey(device.id)) {
             final storedDevice = _serverDevices[device.id];
             if (storedDevice == null) {
               throw Exception('Stored bluetooth device for id[${device.id}] doesn\'t exist');
             }
-
-            if (!protoObj.connected) {
-              storedDevice.disconnect();
-            }
-            return BluetoothServerDevice(storedDevice, protoObj.connected);
+            return BluetoothServerDeviceContainer(storedDevice, protoObj.connected);
           }
 
           // TODO setup for server usage ( disable service discovery for example, should be already connected )
 
           _serverDevices[device.id] = device;
-          return BluetoothServerDevice(device, protoObj.connected);
+          return BluetoothServerDeviceContainer(device, protoObj.connected);
         });
   }
 
   Future stopServer() async {
     if (_isServerRunning.value == false) {
       return;
-    }
-
-    for (final device in _serverDevices.values) {
-      await device.disconnect();
     }
     _serverDevices.clear();
 

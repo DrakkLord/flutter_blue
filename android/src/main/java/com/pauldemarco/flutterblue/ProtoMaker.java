@@ -128,21 +128,21 @@ public class ProtoMaker {
         return p.build();
     }
 
-    static Protos.BluetoothService from(BluetoothDevice device, BluetoothGattService service, BluetoothGatt gatt) {
+    static Protos.BluetoothService from(BluetoothDevice device, BluetoothGattService service, List<BluetoothGattService> services) {
         Protos.BluetoothService.Builder p = Protos.BluetoothService.newBuilder();
         p.setRemoteId(device.getAddress());
         p.setUuid(service.getUuid().toString());
         p.setIsPrimary(service.getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY);
         for(BluetoothGattCharacteristic c : service.getCharacteristics()) {
-            p.addCharacteristics(from(device, c, gatt));
+            p.addCharacteristics(from(device, c, services));
         }
         for(BluetoothGattService s : service.getIncludedServices()) {
-            p.addIncludedServices(from(device, s, gatt));
+            p.addIncludedServices(from(device, s, services));
         }
         return p.build();
     }
 
-    static Protos.BluetoothCharacteristic from(BluetoothDevice device, BluetoothGattCharacteristic characteristic, BluetoothGatt gatt) {
+    static Protos.BluetoothCharacteristic from(BluetoothDevice device, BluetoothGattCharacteristic characteristic, List<BluetoothGattService> services) {
         Protos.BluetoothCharacteristic.Builder p = Protos.BluetoothCharacteristic.newBuilder();
         p.setRemoteId(device.getAddress());
         p.setUuid(characteristic.getUuid().toString());
@@ -156,7 +156,7 @@ public class ProtoMaker {
             p.setServiceUuid(characteristic.getService().getUuid().toString());
         } else {
             // Reverse search to find service
-            for(BluetoothGattService s : gatt.getServices()) {
+            for(BluetoothGattService s : services) {
                 for(BluetoothGattService ss : s.getIncludedServices()) {
                     if(ss.getUuid().equals(characteristic.getService().getUuid())){
                         p.setServiceUuid(s.getUuid().toString());

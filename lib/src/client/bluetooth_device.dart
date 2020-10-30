@@ -4,29 +4,22 @@
 
 part of flutter_blue;
 
-class BluetoothDevice {
-  final DeviceIdentifier id;
-  final String name;
-  final BluetoothDeviceType type;
+class BluetoothDevice extends BluetoothDeviceCommon {
+  BehaviorSubject<bool> _isDiscoveringServices = BehaviorSubject.seeded(false);
+  Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 
   factory BluetoothDevice.fromBuffer(List<int> data) {
     return BluetoothDevice.fromProto(protos.BluetoothDevice.fromBuffer(data));
   }
 
-  BluetoothDevice.fromProto(protos.BluetoothDevice p)
-      : id = new DeviceIdentifier(p.remoteId),
-        name = p.name,
-        type = BluetoothDeviceType.values[p.type.value];
+  BluetoothDevice.fromProto(protos.BluetoothDevice p) :
+        super(new DeviceIdentifier(p.remoteId), p.name, BluetoothDeviceType.values[p.type.value]);
 
   protos.BluetoothDevice toProto() {
     return protos.BluetoothDevice.create()
       ..remoteId = id.id
       ..name = name
       ..type = BluetoothDevice_Type.valueOf(type.index);
-  }
-
-  BehaviorSubject<bool> _isDiscoveringServices = BehaviorSubject.seeded(false);
-  Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 
   /// Establishes a connection to the Bluetooth Device.
   Future<void> connect({
