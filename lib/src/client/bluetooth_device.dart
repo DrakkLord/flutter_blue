@@ -20,6 +20,7 @@ class BluetoothDevice extends BluetoothDeviceCommon {
       ..remoteId = id.id
       ..name = name
       ..type = BluetoothDevice_Type.valueOf(type.index);
+  }
 
   /// Establishes a connection to the Bluetooth Device.
   Future<void> connect({

@@ -989,6 +989,10 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
         }
     };
 
+    private boolean isServerClientDevice(BluetoothDevice device) {
+        return gattClients.containsKey(device.getAddress());
+    }
+
     private BluetoothGattServerCallback mGattServerCallback = new BluetoothGattServerCallback() {
         // TODO
 
@@ -1008,6 +1012,11 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
 
         @Override
         public void onDescriptorWriteRequest(BluetoothDevice device, int requestId, BluetoothGattDescriptor descriptor, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
+            if (!isServerClientDevice(device)) {
+                mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null);
+                return;
+            }
+
             if (descriptor.getUuid().equals(CCCD_ID)) {
                 boolean notifyEnabled = false;
                 boolean indicationEnabled = false;
@@ -1037,6 +1046,19 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
             if (responseNeeded) {
                 mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
             }
+        }
+
+
+
+        @Override
+        public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
+            if (!isServerClientDevice(device)) {
+                mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null);
+                return;
+            }
+
+            Log.e(TAG, "read characteristic: "  + characteristic.getUuid().toString());
+            mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null);
         }
     };
 
