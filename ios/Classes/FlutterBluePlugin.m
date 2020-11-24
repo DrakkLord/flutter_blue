@@ -531,7 +531,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
   }
   ProtosReadDescriptorResponse *result = [[ProtosReadDescriptorResponse alloc] init];
   [result setRequest:q];
-  [result setValue:descriptor.value];
+  [result setValue:[self valueToData:[descriptor value]]];
   [_channel invokeMethod:@"ReadDescriptorResponse" arguments:[self toFlutterData:result]];
 
   // If descriptor is CCCD, send a SetNotificationResponse in case anything is awaiting
@@ -565,6 +565,10 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
 //
 // Proto Helper methods
 //
+- (NSData*)valueToData:(NSNumber*)input {
+  return [NSData dataWithBytes:&(input) length:sizeof(input)];
+}
+
 - (FlutterStandardTypedData*)toFlutterData:(GPBMessage*)proto {
   FlutterStandardTypedData *data = [FlutterStandardTypedData typedDataWithBytes:[[proto data] copy]];
   return data;
@@ -733,7 +737,8 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
   [result setRemoteId:[peripheral.identifier UUIDString]];
   [result setCharacteristicUuid:[descriptor.characteristic.UUID fullUUIDString]];
   [result setServiceUuid:[descriptor.characteristic.service.UUID fullUUIDString]];
-  [result setValue:descriptor.value];
+  [result setValue:[self valueToData:[descriptor value]]];
+
   return result;
 }
 
