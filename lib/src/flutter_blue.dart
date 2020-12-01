@@ -160,7 +160,8 @@ class FlutterBlue {
 
     var payload = protos.ServerAdvertisePayload.create()
       ..serviceUuid = payloadIn.service.toString()
-      ..instanceId = payloadIn.instanceID.toString();
+      ..manufacturerID = payloadIn.manufacturerID
+      ..manufacturerData = payloadIn.manufacturerData;
 
     // Emit to isScanning
     _isAdvertising.add(true);
@@ -326,9 +327,10 @@ class DeviceIdentifier {
 
 class ServerAdvertisePayload {
   final Guid service;
-  final Guid instanceID;
+  final int manufacturerID;
+  final List<int> manufacturerData;
 
-  const ServerAdvertisePayload(this.service, this.instanceID);
+  const ServerAdvertisePayload(this.service, this.manufacturerID, this.manufacturerData);
 }
 
 class ScanResult {

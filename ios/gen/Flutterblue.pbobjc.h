@@ -271,14 +271,17 @@ typedef GPB_ENUM(ProtosScanResult_FieldNumber) {
 
 typedef GPB_ENUM(ProtosServerAdvertisePayload_FieldNumber) {
   ProtosServerAdvertisePayload_FieldNumber_ServiceUuid = 1,
-  ProtosServerAdvertisePayload_FieldNumber_InstanceId = 2,
+  ProtosServerAdvertisePayload_FieldNumber_ManufacturerId = 2,
+  ProtosServerAdvertisePayload_FieldNumber_ManufacturerData = 3,
 };
 
 @interface ProtosServerAdvertisePayload : GPBMessage
 
 @property(nonatomic, readwrite, copy, null_resettable) NSString *serviceUuid;
 
-@property(nonatomic, readwrite, copy, null_resettable) NSString *instanceId;
+@property(nonatomic, readwrite) int32_t manufacturerId;
+
+@property(nonatomic, readwrite, copy, null_resettable) NSData *manufacturerData;
 
 @end
 
@@ -341,6 +344,23 @@ int32_t ProtosBluetoothDevice_Type_RawValue(ProtosBluetoothDevice *message);
  * was generated.
  **/
 void SetProtosBluetoothDevice_Type_RawValue(ProtosBluetoothDevice *message, int32_t value);
+
+#pragma mark - ProtosBluetoothServerDevice
+
+typedef GPB_ENUM(ProtosBluetoothServerDevice_FieldNumber) {
+  ProtosBluetoothServerDevice_FieldNumber_Device = 1,
+  ProtosBluetoothServerDevice_FieldNumber_Connected = 2,
+};
+
+@interface ProtosBluetoothServerDevice : GPBMessage
+
+@property(nonatomic, readwrite, strong, null_resettable) ProtosBluetoothDevice *device;
+/** Test to see if @c device has been set. */
+@property(nonatomic, readwrite) BOOL hasDevice;
+
+@property(nonatomic, readwrite) BOOL connected;
+
+@end
 
 #pragma mark - ProtosBluetoothService
 

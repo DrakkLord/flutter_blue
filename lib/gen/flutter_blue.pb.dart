@@ -233,7 +233,8 @@ class ScanResult extends $pb.GeneratedMessage {
 class ServerAdvertisePayload extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo('ServerAdvertisePayload', createEmptyInstance: create)
     ..aOS(1, 'serviceUuid')
-    ..aOS(2, 'instanceId')
+    ..a<$core.int>(2, 'manufacturerID', $pb.PbFieldType.O3, protoName: 'manufacturerID')
+    ..a<$core.List<$core.int>>(3, 'manufacturerData', $pb.PbFieldType.OY, protoName: 'manufacturerData')
     ..hasRequiredFields = false
   ;
 
@@ -262,13 +263,22 @@ class ServerAdvertisePayload extends $pb.GeneratedMessage {
   void clearServiceUuid() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get instanceId => $_getSZ(1);
+  $core.int get manufacturerID => $_getIZ(1);
   @$pb.TagNumber(2)
-  set instanceId($core.String v) { $_setString(1, v); }
+  set manufacturerID($core.int v) { $_setSignedInt32(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasInstanceId() => $_has(1);
+  $core.bool hasManufacturerID() => $_has(1);
   @$pb.TagNumber(2)
-  void clearInstanceId() => clearField(2);
+  void clearManufacturerID() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.List<$core.int> get manufacturerData => $_getN(2);
+  @$pb.TagNumber(3)
+  set manufacturerData($core.List<$core.int> v) { $_setBytes(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasManufacturerData() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearManufacturerData() => clearField(3);
 }
 
 class ServerAdvertiseResult extends $pb.GeneratedMessage {

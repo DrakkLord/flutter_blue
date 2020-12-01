@@ -51,7 +51,8 @@ message ScanResult {
 
 message ServerAdvertisePayload {
   string service_uuid = 1;
-  string instance_id = 2;
+  int32 manufacturerID = 2;
+  bytes manufacturerData = 3;
 }
 
 message ServerAdvertiseResult {

@@ -420,12 +420,14 @@ typedef struct ProtosScanResult__storage_ {
 @implementation ProtosServerAdvertisePayload
 
 @dynamic serviceUuid;
-@dynamic instanceId;
+@dynamic manufacturerId;
+@dynamic manufacturerData;
 
 typedef struct ProtosServerAdvertisePayload__storage_ {
   uint32_t _has_storage_[1];
+  int32_t manufacturerId;
   NSString *serviceUuid;
-  NSString *instanceId;
+  NSData *manufacturerData;
 } ProtosServerAdvertisePayload__storage_;
 
 // This method is threadsafe because it is initially called
@@ -444,13 +446,22 @@ typedef struct ProtosServerAdvertisePayload__storage_ {
         .dataType = GPBDataTypeString,
       },
       {
-        .name = "instanceId",
+        .name = "manufacturerId",
         .dataTypeSpecific.className = NULL,
-        .number = ProtosServerAdvertisePayload_FieldNumber_InstanceId,
+        .number = ProtosServerAdvertisePayload_FieldNumber_ManufacturerId,
         .hasIndex = 1,
-        .offset = (uint32_t)offsetof(ProtosServerAdvertisePayload__storage_, instanceId),
-        .flags = GPBFieldOptional,
-        .dataType = GPBDataTypeString,
+        .offset = (uint32_t)offsetof(ProtosServerAdvertisePayload__storage_, manufacturerId),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom),
+        .dataType = GPBDataTypeInt32,
+      },
+      {
+        .name = "manufacturerData",
+        .dataTypeSpecific.className = NULL,
+        .number = ProtosServerAdvertisePayload_FieldNumber_ManufacturerData,
+        .hasIndex = 2,
+        .offset = (uint32_t)offsetof(ProtosServerAdvertisePayload__storage_, manufacturerData),
+        .flags = (GPBFieldFlags)(GPBFieldOptional | GPBFieldTextFormatNameCustom),
+        .dataType = GPBDataTypeBytes,
       },
     };
     GPBDescriptor *localDescriptor =
@@ -461,6 +472,11 @@ typedef struct ProtosServerAdvertisePayload__storage_ {
                                     fieldCount:(uint32_t)(sizeof(fields) / sizeof(GPBMessageFieldDescription))
                                    storageSize:sizeof(ProtosServerAdvertisePayload__storage_)
                                          flags:GPBDescriptorInitializationFlag_None];
+#if !GPBOBJC_SKIP_MESSAGE_TEXTFORMAT_EXTRAS
+    static const char *extraTextFormatInfo =
+        "\002\002\rA\000\003\020\000";
+    [localDescriptor setupExtraTextInfo:extraTextFormatInfo];
+#endif  // !GPBOBJC_SKIP_MESSAGE_TEXTFORMAT_EXTRAS
     #if defined(DEBUG) && DEBUG
       NSAssert(descriptor == nil, @"Startup recursed!");
     #endif  // DEBUG
@@ -703,6 +719,61 @@ BOOL ProtosBluetoothDevice_Type_IsValidValue(int32_t value__) {
       return NO;
   }
 }
+
+#pragma mark - ProtosBluetoothServerDevice
+
+@implementation ProtosBluetoothServerDevice
+
+@dynamic hasDevice, device;
+@dynamic connected;
+
+typedef struct ProtosBluetoothServerDevice__storage_ {
+  uint32_t _has_storage_[1];
+  ProtosBluetoothDevice *device;
+} ProtosBluetoothServerDevice__storage_;
+
+// This method is threadsafe because it is initially called
+// in +initialize for each subclass.
++ (GPBDescriptor *)descriptor {
+  static GPBDescriptor *descriptor = nil;
+  if (!descriptor) {
+    static GPBMessageFieldDescription fields[] = {
+      {
+        .name = "device",
+        .dataTypeSpecific.className = GPBStringifySymbol(ProtosBluetoothDevice),
+        .number = ProtosBluetoothServerDevice_FieldNumber_Device,
+        .hasIndex = 0,
+        .offset = (uint32_t)offsetof(ProtosBluetoothServerDevice__storage_, device),
+        .flags = GPBFieldOptional,
+        .dataType = GPBDataTypeMessage,
+      },
+      {
+        .name = "connected",
+        .dataTypeSpecific.className = NULL,
+        .number = ProtosBluetoothServerDevice_FieldNumber_Connected,
+        .hasIndex = 1,
+        .offset = 2,  // Stored in _has_storage_ to save space.
+        .flags = GPBFieldOptional,
+        .dataType = GPBDataTypeBool,
+      },
+    };
+    GPBDescriptor *localDescriptor =
+        [GPBDescriptor allocDescriptorForClass:[ProtosBluetoothServerDevice class]
+                                     rootClass:[ProtosFlutterBlueRoot class]
+                                          file:ProtosFlutterBlueRoot_FileDescriptor()
+                                        fields:fields
+                                    fieldCount:(uint32_t)(sizeof(fields) / sizeof(GPBMessageFieldDescription))
+                                   storageSize:sizeof(ProtosBluetoothServerDevice__storage_)
+                                         flags:GPBDescriptorInitializationFlag_None];
+    #if defined(DEBUG) && DEBUG
+      NSAssert(descriptor == nil, @"Startup recursed!");
+    #endif  // DEBUG
+    descriptor = localDescriptor;
+  }
+  return descriptor;
+}
+
+@end
 
 #pragma mark - ProtosBluetoothService
 

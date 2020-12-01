@@ -883,9 +883,8 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 .setIncludeDeviceName(false)
                 .setIncludeTxPowerLevel(false);
 
-        if (!payload.getInstanceIdBytes().isEmpty()) {
-            final ParcelUuid parcelUuid = ParcelUuid.fromString(payload.getInstanceId());
-            scanResponseBuilder.addManufacturerData (1, uuidToBytes(parcelUuid.getUuid()));
+        if (!payload.getManufacturerData().isEmpty()) {
+            scanResponseBuilder.addManufacturerData(payload.getManufacturerID(), payload.getManufacturerData().toByteArray());
         }
         final AdvertiseData scanResponse = scanResponseBuilder.build();
 
@@ -1047,8 +1046,6 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
             }
         }
-
-
 
         @Override
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
