@@ -1057,7 +1057,6 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
             Log.e(TAG, "read characteristic: "  + characteristic.getUuid().toString());
             mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
         }
-        }
     };
 
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
