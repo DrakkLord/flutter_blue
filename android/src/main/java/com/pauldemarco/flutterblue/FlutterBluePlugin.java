@@ -1050,12 +1050,13 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
         @Override
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
             if (!isServerClientDevice(device)) {
-                mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null);
+                mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
                 return;
             }
 
             Log.e(TAG, "read characteristic: "  + characteristic.getUuid().toString());
-            mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null);
+            mBluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
+        }
         }
     };
 
