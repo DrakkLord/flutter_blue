@@ -42,16 +42,30 @@ class BluetoothDevice extends BluetoothDeviceCommon {
       });
     }
 
+    /*
+    if ((await state.last) == BluetoothDeviceState.connected) {
+      print('kutyagumi');
+    }
+     */
+
+    state.firstWhere((s) => s == BluetoothDeviceState.connected).then(
+            (_) {
+              timer?.cancel();
+              completer.complete();
+            }
+    );
+
     await FlutterBlue.instance._channel
         .invokeMethod('connect', request.writeToBuffer());
 
-    //await state.firstWhere((s) => s == BluetoothDeviceState.connected);
-    state.listen((event) {
+    /*
+    final subscription = state.listen((event) {
       if (event == BluetoothDeviceState.connected) {
         timer?.cancel();
         completer.complete();
       }
     });
+     */
 
     //timer?.cancel();
 
