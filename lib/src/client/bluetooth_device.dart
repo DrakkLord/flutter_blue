@@ -8,6 +8,8 @@ class BluetoothDevice extends BluetoothDeviceCommon {
   BehaviorSubject<bool> _isDiscoveringServices = BehaviorSubject.seeded(false);
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 
+  StreamSubscription _stateSubscription;
+
   factory BluetoothDevice.fromBuffer(List<int> data) {
     return BluetoothDevice.fromProto(protos.BluetoothDevice.fromBuffer(data));
   }
@@ -42,12 +44,6 @@ class BluetoothDevice extends BluetoothDeviceCommon {
       });
     }
 
-    /*
-    if ((await state.last) == BluetoothDeviceState.connected) {
-      print('kutyagumi');
-    }
-     */
-
     state.firstWhere((s) => s == BluetoothDeviceState.connected).then(
             (_) {
               timer?.cancel();
@@ -55,17 +51,12 @@ class BluetoothDevice extends BluetoothDeviceCommon {
             }
     );
 
+    _stateSubscription = _stateSubscription ?? state.listen((event) {
+      print('BLE STATE: $event');
+    });
+
     await FlutterBlue.instance._channel
         .invokeMethod('connect', request.writeToBuffer());
-
-    /*
-    final subscription = state.listen((event) {
-      if (event == BluetoothDeviceState.connected) {
-        timer?.cancel();
-        completer.complete();
-      }
-    });
-     */
 
     //timer?.cancel();
 
