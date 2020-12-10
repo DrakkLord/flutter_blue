@@ -8,8 +8,6 @@ class BluetoothDevice extends BluetoothDeviceCommon {
   BehaviorSubject<bool> _isDiscoveringServices = BehaviorSubject.seeded(false);
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 
-  StreamSubscription _stateSubscription;
-
   factory BluetoothDevice.fromBuffer(List<int> data) {
     return BluetoothDevice.fromProto(protos.BluetoothDevice.fromBuffer(data));
   }
@@ -50,10 +48,6 @@ class BluetoothDevice extends BluetoothDeviceCommon {
               completer.complete();
             }
     );
-
-    _stateSubscription = _stateSubscription ?? state.listen((event) {
-      print('BLE STATE: $event');
-    });
 
     await FlutterBlue.instance._channel
         .invokeMethod('connect', request.writeToBuffer());
