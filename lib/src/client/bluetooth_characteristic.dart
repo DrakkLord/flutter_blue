@@ -4,6 +4,14 @@
 
 part of flutter_blue;
 
+@immutable
+class _SetNotifyResults {
+  final BluetoothCharacteristic c;
+  final bool success;
+
+  const _SetNotifyResults(this.c, this.success);
+}
+
 class BluetoothCharacteristic {
   final Guid uuid;
   final DeviceIdentifier deviceId;
@@ -193,11 +201,14 @@ class BluetoothCharacteristic {
             (p.characteristic.uuid == request.characteristicUuid) &&
             (p.characteristic.serviceUuid == request.serviceUuid))
         .first
-        .then((p) => new BluetoothCharacteristic.fromProto(p.characteristic))
-        .then((c) {
-      _updateDescriptors(c.descriptors);
-      _value.add(c.lastValue);
-      return (c.isNotifying == notify);
+        .then((p) => new _SetNotifyResults(BluetoothCharacteristic.fromProto(p.characteristic), p.success))
+        .then((r) {
+      _updateDescriptors(r.c.descriptors);
+      _value.add(r.c.lastValue);
+
+      // TODO: this should verify that notify was enabled, it now only checks that the request was accepted by the remote
+      return r.success;
+//      return (c.isNotifying == notify);
     });
   }
 }
