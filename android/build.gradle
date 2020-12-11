@@ -79,7 +79,7 @@ protobuf {
 
 dependencies {
     // You need to depend on the lite runtime library, not protobuf-java
-    compile 'com.google.protobuf:protobuf-javalite:3.8.0'
+    compile 'com.google.protobuf:protobuf-javalite:3.11.0'
 
     //implementation 'com.google.protobuf:protobuf-lite:3.0.1'
     // https://mvnrepository.com/artifact/com.google.protobuf/protobuf-javalite

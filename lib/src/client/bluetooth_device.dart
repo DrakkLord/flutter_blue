@@ -42,16 +42,15 @@ class BluetoothDevice extends BluetoothDeviceCommon {
       });
     }
 
+    state.firstWhere((s) => s == BluetoothDeviceState.connected).then(
+            (_) {
+              timer?.cancel();
+              completer.complete();
+            }
+    );
+
     await FlutterBlue.instance._channel
         .invokeMethod('connect', request.writeToBuffer());
-
-    //await state.firstWhere((s) => s == BluetoothDeviceState.connected);
-    state.listen((event) {
-      if (event == BluetoothDeviceState.connected) {
-        timer?.cancel();
-        completer.complete();
-      }
-    });
 
     //timer?.cancel();
 
@@ -59,8 +58,16 @@ class BluetoothDevice extends BluetoothDeviceCommon {
   }
 
   /// Cancels connection to the Bluetooth Device
-  Future disconnect() =>
-      FlutterBlue.instance._channel.invokeMethod('disconnect', id.toString());
+  Future<void> disconnect() async {
+    final completer = Completer();
+    state.firstWhere((s) => s == BluetoothDeviceState.disconnected).then(
+            (_) {
+          completer.complete();
+        }
+    );
+    FlutterBlue.instance._channel.invokeMethod('disconnect', id.toString());
+    return completer.future;
+  }
 
   BehaviorSubject<List<BluetoothService>> _services =
       BehaviorSubject.seeded([]);
