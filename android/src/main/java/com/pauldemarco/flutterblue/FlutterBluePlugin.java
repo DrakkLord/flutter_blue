@@ -1166,6 +1166,7 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 Protos.SetNotificationResponse.Builder q = Protos.SetNotificationResponse.newBuilder();
                 q.setRemoteId(gatt.getDevice().getAddress());
                 q.setCharacteristic(ProtoMaker.from(gatt.getDevice(), descriptor.getCharacteristic(), gatt.getServices()));
+                q.setSuccess(true);
                 invokeMethodUIThread("SetNotificationResponse", q.build().toByteArray());
             }
         }
