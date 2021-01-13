@@ -12,8 +12,9 @@ class BluetoothDevice extends BluetoothDeviceCommon {
     return BluetoothDevice.fromProto(protos.BluetoothDevice.fromBuffer(data));
   }
 
-  BluetoothDevice.fromProto(protos.BluetoothDevice p) :
-        super(new DeviceIdentifier(p.remoteId), p.name, BluetoothDeviceType.values[p.type.value]);
+  BluetoothDevice.fromProto(protos.BluetoothDevice p)
+      : super(new DeviceIdentifier(p.remoteId), p.name,
+            BluetoothDeviceType.values[p.type.value]);
 
   protos.BluetoothDevice toProto() {
     return protos.BluetoothDevice.create()
@@ -32,27 +33,34 @@ class BluetoothDevice extends BluetoothDeviceCommon {
       ..androidAutoConnect = autoConnect;
 
     final completer = Completer();
-    
+
     Timer timer;
+
+    final waitForConnectSubscription =
+        state.listen(null, onError: (error, stacktrace) {
+      completer.completeError(error);
+    }, cancelOnError: true);
+
+    waitForConnectSubscription.onData((state) {
+      if (state != BluetoothDeviceState.connected) {
+        return;
+      }
+      timer?.cancel();
+      completer.complete();
+      waitForConnectSubscription.cancel();
+    });
+
     if (timeout != null) {
       timer = Timer(timeout, () {
+        waitForConnectSubscription.cancel();
         disconnect();
-        //throw TimeoutException('Failed to connect in time.', timeout);
-        completer.completeError(TimeoutException('Failed to connect in time.', timeout));
+        completer.completeError(
+            TimeoutException('Failed to connect in time.', timeout));
       });
     }
 
-    state.firstWhere((s) => s == BluetoothDeviceState.connected).then(
-            (_) {
-              timer?.cancel();
-              completer.complete();
-            }
-    );
-
     await FlutterBlue.instance._channel
         .invokeMethod('connect', request.writeToBuffer());
-
-    //timer?.cancel();
 
     return completer.future;
   }
@@ -60,11 +68,9 @@ class BluetoothDevice extends BluetoothDeviceCommon {
   /// Cancels connection to the Bluetooth Device
   Future<void> disconnect() async {
     final completer = Completer();
-    state.firstWhere((s) => s == BluetoothDeviceState.disconnected).then(
-            (_) {
-          completer.complete();
-        }
-    );
+    state.firstWhere((s) => s == BluetoothDeviceState.disconnected).then((_) {
+      completer.complete();
+    });
     FlutterBlue.instance._channel.invokeMethod('disconnect', id.toString());
     return completer.future;
   }
