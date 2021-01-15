@@ -23,11 +23,29 @@ class BluetoothDevice extends BluetoothDeviceCommon {
       ..type = BluetoothDevice_Type.valueOf(type.index);
   }
 
-  /// Establishes a connection to the Bluetooth Device.
   Future<void> connect({
     Duration timeout,
     bool autoConnect = true,
   }) async {
+    return Future.sync(() async {
+      var lastError;
+      for (int i = 0; i < 3; i++) {
+        try {
+          await _connectInternal(timeout, autoConnect);
+          return;
+        } catch (e) {
+          lastError = e;
+        }
+      }
+      throw FatalConnectionError(lastError);
+    });
+  }
+
+  /// Establishes a connection to the Bluetooth Device.
+  Future<void> _connectInternal(
+    Duration timeout,
+    bool autoConnect,
+  ) async {
     var request = protos.ConnectRequest.create()
       ..remoteId = id.toString()
       ..androidAutoConnect = autoConnect;
