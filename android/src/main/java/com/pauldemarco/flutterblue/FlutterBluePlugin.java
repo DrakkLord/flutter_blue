@@ -64,7 +64,7 @@ import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener;
 /**
  * FlutterBluePlugin
  */
-public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsResultListener  {
+public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsResultListener {
     private static final String TAG = "FlutterBluePlugin";
     private static final String NAMESPACE = "plugins.pauldemarco.com/flutter_blue";
     private static final int REQUEST_COARSE_LOCATION_PERMISSIONS = 1452;
@@ -1116,6 +1116,10 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                     "[onConnectionStateChange] status: " + GattHelpers.gattStatusToString(status)
                     + " newState: " + GattHelpers.connectionStateToString(newState)
                     + " - GATT == " + gatt.hashCode());
+            if (status != BluetoothGatt.GATT_SUCCESS) {
+                gatt.close();
+                mGattServers.remove(gatt.getDevice().getAddress());
+            }
             invokeMethodUIThread("DeviceState", ProtoMaker.from(gatt.getDevice(), newState).toByteArray());
         }
 
