@@ -48,8 +48,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.EventChannel.EventSink;
 import io.flutter.plugin.common.EventChannel.StreamHandler;
@@ -57,23 +63,33 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener;
+import io.flutter.view.FlutterNativeView;
 
 
 /**
  * FlutterBluePlugin
  */
-public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsResultListener {
+public class FlutterBluePlugin
+        implements
+            FlutterPlugin,
+            MethodCallHandler,
+            RequestPermissionsResultListener,
+            ActivityAware,
+            PluginRegistry.ViewDestroyListener
+{
     private static final String TAG = "FlutterBluePlugin";
     private static final String NAMESPACE = "plugins.pauldemarco.com/flutter_blue";
     private static final int REQUEST_COARSE_LOCATION_PERMISSIONS = 1452;
     static final private UUID CCCD_ID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
-    private final Registrar registrar;
-    private final Activity activity;
-    private final MethodChannel channel;
-    private final EventChannel stateChannel;
-    private final BluetoothManager mBluetoothManager;
+
+    private ActivityPluginBinding mActivityBinding;
+    private Activity mActivity;
+    private MethodChannel channel;
+    private EventChannel stateChannel;
+    private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
     private final Map<String, BluetoothGatt> mGattServers = new HashMap<>();
     private LogLevel logLevel = LogLevel.EMERGENCY;
@@ -91,27 +107,103 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
     private boolean mServerActive;
     private HashMap<String, BluetoothDevice> gattClients = new HashMap<>();
 
-    /**
-     * Plugin registration.
-     */
     public static void registerWith(Registrar registrar) {
-        final FlutterBluePlugin instance = new FlutterBluePlugin(registrar);
-        registrar.addRequestPermissionsResultListener(instance);
-    }
-
-    FlutterBluePlugin(Registrar r){
-        this.registrar = r;
-        this.activity = r.activity();
-        this.channel = new MethodChannel(registrar.messenger(), NAMESPACE+"/methods");
-        this.stateChannel = new EventChannel(registrar.messenger(), NAMESPACE+"/state");
-        this.mBluetoothManager = (BluetoothManager) r.activity().getSystemService(Context.BLUETOOTH_SERVICE);
-        this.mBluetoothAdapter = mBluetoothManager.getAdapter();
-        channel.setMethodCallHandler(this);
-        stateChannel.setStreamHandler(stateHandler);
+        final FlutterBluePlugin instance = new FlutterBluePlugin();
+        instance.onAttachedToEngine(registrar.context(), registrar.messenger());
+        instance.onRegisteredWith(registrar);
     }
 
     @Override
-    public void onMethodCall(MethodCall call, Result result) {
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+        onAttachedToEngine(flutterPluginBinding.getApplicationContext(),
+                           flutterPluginBinding.getBinaryMessenger());
+    }
+
+    // cleanup v1 only
+    @Override
+    public boolean onViewDestroy(FlutterNativeView view) {
+        onCleanupPlugin();
+        onDetachedFromEngine();
+        return true;
+    }
+
+    // cleanup v2 only
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+        onDetachedFromEngine();
+    }
+
+    // setup v1 only
+    private void onRegisteredWith(Registrar registrar) {
+        mActivity = registrar.activity();
+        registrar.addViewDestroyListener(this);
+    }
+
+    // activity aware
+    @Override
+    public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+        mActivity = binding.getActivity();
+        mActivityBinding = binding;
+        mActivityBinding.addRequestPermissionsResultListener(this);
+    }
+
+    @Override
+    public void onDetachedFromActivity() {
+        if (mActivityBinding != null) {
+            mActivityBinding.removeRequestPermissionsResultListener(this);
+        }
+        onCleanupPlugin();
+        mActivityBinding = null;
+    }
+
+    @Override
+    public void onDetachedFromActivityForConfigChanges() {
+        mActivity = null;
+    }
+
+    @Override
+    public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+        mActivity = binding.getActivity();
+    }
+
+    private void onAttachedToEngine(Context context, BinaryMessenger messenger) {
+        mBluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        mBluetoothAdapter = mBluetoothManager.getAdapter();
+
+        channel = new MethodChannel(messenger, NAMESPACE + "/methods");
+        channel.setMethodCallHandler(this);
+
+        stateChannel = new EventChannel(messenger, NAMESPACE + "/state");
+        stateChannel.setStreamHandler(stateHandler);
+    }
+
+    private void onDetachedFromEngine() {
+        channel.setMethodCallHandler(null);
+        channel = null;
+        stateChannel.setStreamHandler(null);
+        stateChannel = null;
+        mActivity = null;
+    }
+
+    private void onCleanupPlugin() {
+        for (final Map.Entry<String, BluetoothGatt> e : mGattServers.entrySet()) {
+            final String targetAddress = e.getKey();
+            final BluetoothGatt gatt = e.getValue();
+
+            if (targetAddress != null) {
+                if (isConnected(targetAddress) && gatt != null) {
+                    gatt.disconnect();
+                }
+            }
+            if (gatt != null) {
+                gatt.close();
+            }
+        }
+        mGattServers.clear();
+    }
+
+    @Override
+    public void onMethodCall(@NonNull MethodCall call, @NonNull  Result result) {
         if(mBluetoothAdapter == null && !"isAvailable".equals(call.method)) {
             result.error("bluetooth_unavailable", "the device does not have bluetooth", null);
             return;
@@ -175,10 +267,10 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
 
             case "startScan":
             {
-                if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+                if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.ACCESS_COARSE_LOCATION)
                         != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(
-                            activity,
+                            mActivity,
                             new String[] {
                                     Manifest.permission.ACCESS_COARSE_LOCATION
                             },
@@ -275,9 +367,9 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
                 // New request, connect and add gattServer to Map
                 BluetoothGatt gattServer;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    gattServer = device.connectGatt(activity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE);
+                    gattServer = device.connectGatt(mActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE);
                 } else {
-                    gattServer = device.connectGatt(activity, false, mGattCallback);
+                    gattServer = device.connectGatt(mActivity, false, mGattCallback);
                 }
 
                 if (options.getAndroidAutoConnect()) {
@@ -743,13 +835,13 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
         public void onListen(Object o, EventChannel.EventSink eventSink) {
             sink = eventSink;
             IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-            activity.registerReceiver(mReceiver, filter);
+            mActivity.registerReceiver(mReceiver, filter);
         }
 
         @Override
         public void onCancel(Object o) {
             sink = null;
-            activity.unregisterReceiver(mReceiver);
+            mActivity.unregisterReceiver(mReceiver);
         }
     };
 
@@ -970,7 +1062,7 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
             return;
         }
 
-        mBluetoothGattServer = mBluetoothManager.openGattServer(activity.getApplicationContext(), mGattServerCallback);
+        mBluetoothGattServer = mBluetoothManager.openGattServer(mActivity.getApplicationContext(), mGattServerCallback);
         if (mBluetoothGattServer == null) {
             result.error("bluetooth_server_error",
                     "start server failed to open gatt server!",
@@ -1272,19 +1364,12 @@ public class FlutterBluePlugin implements MethodCallHandler, RequestPermissionsR
 
     private void invokeMethodUIThread(final String name, final byte[] byteArray)
     {
-        activity.runOnUiThread(
+        mActivity.runOnUiThread(
                 new Runnable() {
                     @Override
                     public void run() {
                         channel.invokeMethod(name, byteArray);
                     }
                 });
-    }
-
-    private byte[] uuidToBytes(UUID uid) {
-        final ByteBuffer buffer = ByteBuffer.allocate((Long.SIZE / Byte.SIZE) * 2);
-        buffer.putLong(uid.getMostSignificantBits());
-        buffer.putLong(uid.getLeastSignificantBits());
-        return buffer.array();
     }
 }
