@@ -1362,14 +1362,19 @@ public class FlutterBluePlugin
         }
     }
 
-    private void invokeMethodUIThread(final String name, final byte[] byteArray)
-    {
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        channel.invokeMethod(name, byteArray);
-                    }
-                });
+    private void invokeMethodUIThread(final String name, final byte[] byteArray) {
+        final Activity localActivity = mActivity;
+        if (localActivity != null) {
+            final MethodChannel localChannel = channel;
+            if (!localActivity.isFinishing() && !localActivity.isDestroyed() && localChannel != null) {
+                localActivity.runOnUiThread(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                localChannel.invokeMethod(name, byteArray);
+                            }
+                        });
+            }
+        }
     }
 }
